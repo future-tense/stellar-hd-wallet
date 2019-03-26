@@ -5,13 +5,11 @@
   "author": "Chris Hatch",
   "repository": "chatch/stellar-hd-wallet",
   "license": "Apache-2.0",
-  "main": "lib/stellar-hd-wallet.js",
+  "main": "src/stellar-hd-wallet.js",
   "files": [
-    "lib"
+    "src"
   ],
   "scripts": {
-    "test": "mocha --require babel-register",
-    "prepublish": "./node_modules/.bin/babel src --out-dir lib"
   },
   "keywords": [
     "SEP-0005",
@@ -28,12 +26,5 @@
     "create-hmac": "^1.1.7",
     "lodash": "^4.17.11",
     "stellar-base": "^0.13.0"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-preset-env": "^1.7.0",
-    "babel-register": "^6.26.0",
-    "mocha": "^4.0.1"
   }
 }
