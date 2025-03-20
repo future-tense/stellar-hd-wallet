@@ -1,7 +1,12 @@
-import has from "lodash/has";
-import bip39 from "bip39";
-import {derivePath} from "./hd-key";
-import {Keypair} from "stellar-base";
+import {
+  generateMnemonic,
+  mnemonicToSeedSync,
+  validateMnemonic,
+  wordlists,
+} from "bip39";
+
+import slip10 from "micro-key-producer/slip10.js";
+import { Keypair } from "@stellar/stellar-base";
 
 const ENTROPY_BITS = 256; // = 24 word mnemonic
 
@@ -12,7 +17,7 @@ const INVALID_MNEMONIC = "Invalid mnemonic (see bip39)";
  * Class for SEP-0005 key derivation.
  * @see {@link https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0005.md|SEP-0005}
  */
-class StellarHDWallet {
+export class StellarHDWallet {
   /**
    * Instance from a BIP39 mnemonic string.
    * @param {string} mnemonic A BIP39 mnemonic
@@ -24,7 +29,7 @@ class StellarHDWallet {
     if (!StellarHDWallet.validateMnemonic(mnemonic, language)) {
       throw new Error(INVALID_MNEMONIC);
     }
-    return new StellarHDWallet(bip39.mnemonicToSeedHex(mnemonic, password));
+    return new StellarHDWallet(mnemonicToSeedSync(mnemonic, password).toString('hex'));
   }
 
   /**
@@ -58,12 +63,12 @@ class StellarHDWallet {
     language = "english",
     rngFn = undefined
   } = {}) {
-    if (language && !has(bip39.wordlists, language))
+    if (language && !(language in wordlists))
       throw new TypeError(
         `Language ${language} does not have a wordlist in the bip39 module`
       );
-    const wordlist = bip39.wordlists[language];
-    return bip39.generateMnemonic(entropyBits, rngFn, wordlist);
+    const wordlist = wordlists[language];
+    return generateMnemonic(entropyBits, rngFn, wordlist);
   }
 
   /**
@@ -75,12 +80,12 @@ class StellarHDWallet {
    * @throws {TypeError} Langauge not supported by bip39 module
    */
   static validateMnemonic(mnemonic, language = "english") {
-    if (language && !has(bip39.wordlists, language))
+    if (language && !(language in wordlists))
       throw new TypeError(
         `Language ${language} does not have a wordlist in the bip39 module`
       );
-    const wordlist = bip39.wordlists[language];
-    return bip39.validateMnemonic(mnemonic, wordlist);
+    const wordlist = wordlists[language];
+    return validateMnemonic(mnemonic, wordlist);
   }
 
   /**
@@ -88,7 +93,7 @@ class StellarHDWallet {
    * @param {string} seedHex Hex string
    */
   constructor(seedHex) {
-    this.seedHex = seedHex;
+    this.key = slip10.fromMasterSeed(Buffer.from(seedHex, 'hex'));
   }
 
   /**
@@ -97,8 +102,7 @@ class StellarHDWallet {
    * @return {Buffer} Key binary as Buffer
    */
   derive(path) {
-    const data = derivePath(path, this.seedHex);
-    return data.key;
+    return Buffer.from(this.key.derive(path).privateKey);
   }
 
   /**
@@ -129,5 +133,3 @@ class StellarHDWallet {
     return this.getKeypair(index).secret();
   }
 }
-
-export default StellarHDWallet;

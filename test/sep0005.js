@@ -1,6 +1,5 @@
 import assert from 'assert'
-import has from 'lodash/has'
-import StellarHDWallet from '../src/stellar-hd-wallet'
+import { StellarHDWallet } from '../src/stellar-hd-wallet.js'
 
 const assertKeypair = (actualKeypair, expectedPublicKey, expectedSecret) => {
   assert.equal(actualKeypair.publicKey(), expectedPublicKey)
@@ -10,7 +9,7 @@ const assertKeypair = (actualKeypair, expectedPublicKey, expectedSecret) => {
 const specTestCase = num => () => {
   const testCase = require(`./data/sep0005-testcase-${num}.json`)
 
-  const wallet = has(testCase, 'passphrase')
+  const wallet = 'passphrase' in testCase
     ? StellarHDWallet.fromMnemonic(testCase.seedWords, testCase.passphrase)
     : StellarHDWallet.fromMnemonic(testCase.seedWords)
 

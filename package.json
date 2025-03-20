@@ -1,15 +1,17 @@
 {
   "name": "stellar-hd-wallet",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "description": "Key derivation for Stellar (SEP-0005)",
   "author": "Chris Hatch",
   "repository": "chatch/stellar-hd-wallet",
   "license": "Apache-2.0",
-  "main": "src/stellar-hd-wallet.js",
+  "main": "lib/stellar-hd-wallet.js",
   "files": [
-    "src"
+    "lib"
   ],
   "scripts": {
+    "test": "mocha --require babel-register",
+    "prepublish": "./node_modules/.bin/babel src --out-dir lib"
   },
   "keywords": [
     "SEP-0005",
@@ -22,9 +24,15 @@
     "keys"
   ],
   "dependencies": {
-    "bip39": "^2.5.0",
-    "create-hmac": "^1.1.7",
-    "lodash": "^4.17.11",
-    "stellar-base": "^0.13.0"
+    "@stellar/stellar-base": "^12.1.1",
+    "bip39": "^3.1.0",
+    "micro-key-producer": "^0.7.5"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
+    "mocha": "^4.0.1"
   }
 }
