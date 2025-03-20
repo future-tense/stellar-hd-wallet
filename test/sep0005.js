@@ -1,4 +1,5 @@
 import assert from 'assert'
+import { mnemonicToSeedSync } from 'bip39';
 import { StellarHDWallet } from '../src/stellar-hd-wallet.js'
 
 const assertKeypair = (actualKeypair, expectedPublicKey, expectedSecret) => {
@@ -9,9 +10,10 @@ const assertKeypair = (actualKeypair, expectedPublicKey, expectedSecret) => {
 const specTestCase = num => () => {
   const testCase = require(`./data/sep0005-testcase-${num}.json`)
 
-  const wallet = 'passphrase' in testCase
-    ? StellarHDWallet.fromMnemonic(testCase.seedWords, testCase.passphrase)
-    : StellarHDWallet.fromMnemonic(testCase.seedWords)
+  const seed = 'passphrase' in testCase
+    ? mnemonicToSeedSync(testCase.seedWords, testCase.passphrase)
+    : mnemonicToSeedSync(testCase.seedWords)
+  const wallet = StellarHDWallet.fromSeed(seed);
 
   it('derives expected parent key', () => {
     assert.equal(

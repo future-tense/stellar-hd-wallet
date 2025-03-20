@@ -8,11 +8,13 @@ Key derivation for Stellar ([SEP-0005](https://github.com/stellar/stellar-protoc
 ## Usage
 
 ```js
-import StellarHDWallet from 'stellar-hd-wallet'
+import { StellarHDWallet } from 'stellar-hd-wallet';
+import { generateMnemonic, mnemonicToSeed, validateMnemnic } from 'bip-39';
 
-const mnemonic = StellarHDWallet.generateMnemonic()
-const wallet = StellarHDWallet.fromMnemonic(mnemonic)
+const mnemonic = generateMnemonic();
+const seed = await mnemonicToSeed(mnemonic);
 
+const wallet = StellarHDWallet.fromSeed(seed);
 wallet.getPublicKey(0) // => GDKYMXOAJ5MK4EVIHHNWRGAAOUZMNZYAETMHFCD6JCVBPZ77TUAZFPKT
 wallet.getSecret(0) // => SCVVKNLBHOWBNJYHD3CNROOA2P3K35I5GNTYUHLLMUHMHWQYNEI7LVED
 wallet.getKeypair(0) // => StellarBase.Keypair for account 0
@@ -26,13 +28,13 @@ StellarHDWallet.fromSeed(seedHex)
 StellarHDWallet.fromSeed(seedBuffer)
 
 // mnemonics with different lengths
-StellarHDWallet.generateMnemonic() // 24 words
-StellarHDWallet.generateMnemonic({entropyBits: 224}) // 21 words
-StellarHDWallet.generateMnemonic({entropyBits: 160}) // 18 words
-StellarHDWallet.generateMnemonic({entropyBits: 128}) // 12 words
+generateMnemonic() // 24 words
+generateMnemonic({entropyBits: 224}) // 21 words
+generateMnemonic({entropyBits: 160}) // 18 words
+generateMnemonic({entropyBits: 128}) // 12 words
 
 // validate a mnemonic
-StellarHDWallet.validateMnemonic('too short and non wordlist words') // false
+validateMnemonic('too short and non wordlist words') // false
 ```
 
 ## Mnemonic Language

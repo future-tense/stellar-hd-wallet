@@ -1,36 +1,13 @@
-import {
-  generateMnemonic,
-  mnemonicToSeedSync,
-  validateMnemonic,
-  wordlists,
-} from "bip39";
-
 import slip10 from "micro-key-producer/slip10.js";
 import { Keypair } from "@stellar/stellar-base";
 
-const ENTROPY_BITS = 256; // = 24 word mnemonic
-
 const INVALID_SEED = "Invalid seed (must be a Buffer or hex string)";
-const INVALID_MNEMONIC = "Invalid mnemonic (see bip39)";
 
 /**
  * Class for SEP-0005 key derivation.
  * @see {@link https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0005.md|SEP-0005}
  */
 export class StellarHDWallet {
-  /**
-   * Instance from a BIP39 mnemonic string.
-   * @param {string} mnemonic A BIP39 mnemonic
-   * @param {string} [password] Optional mnemonic password
-   * @param {string} [language='english'] Optional language of mnemonic
-   * @throws {Error} Invalid Mnemonic
-   */
-  static fromMnemonic(mnemonic, password = undefined, language = "english") {
-    if (!StellarHDWallet.validateMnemonic(mnemonic, language)) {
-      throw new Error(INVALID_MNEMONIC);
-    }
-    return new StellarHDWallet(mnemonicToSeedSync(mnemonic, password).toString('hex'));
-  }
 
   /**
    * Instance from a seed
@@ -38,62 +15,19 @@ export class StellarHDWallet {
    * @throws {TypeError} Invalid seed
    */
   static fromSeed(seed) {
-    let seedHex;
-
-    if (Buffer.isBuffer(seed)) seedHex = seed.toString("hex");
-    else if (typeof seed === "string") seedHex = seed;
-    else throw new TypeError(INVALID_SEED);
-
-    return new StellarHDWallet(seedHex);
+    if (!Buffer.isBuffer(seed)) {
+      if (typeof seed === "string") seed = Buffer.from(seed, 'hex')
+      else throw new TypeError(INVALID_SEED);  
+    }
+    return new StellarHDWallet(seed);
   }
 
   /**
-   * Generate a mnemonic using BIP39
-   * @param {Object} props Properties defining how to generate the mnemonic
-   * @param {Number} [props.entropyBits=256] Entropy bits
-   * @param {string} [props.language='english'] name of a language wordlist as
-   *          defined in the 'bip39' npm module. See module.exports.wordlists:
-   *          here https://github.com/bitcoinjs/bip39/blob/master/index.js
-   * @param {function} [props.rng] RNG function (default is crypto.randomBytes)
-   * @throws {TypeError} Langauge not supported by bip39 module
-   * @throws {TypeError} Invalid entropy
+   * New instance from seed buffer
+   * @param {Buffer} seed
    */
-  static generateMnemonic({
-    entropyBits = ENTROPY_BITS,
-    language = "english",
-    rngFn = undefined
-  } = {}) {
-    if (language && !(language in wordlists))
-      throw new TypeError(
-        `Language ${language} does not have a wordlist in the bip39 module`
-      );
-    const wordlist = wordlists[language];
-    return generateMnemonic(entropyBits, rngFn, wordlist);
-  }
-
-  /**
-   * Validate a mnemonic using BIP39
-   * @param {string} mnemonic A BIP39 mnemonic
-   * @param {string} [language='english'] name of a language wordlist as
-   *          defined in the 'bip39' npm module. See module.exports.wordlists:
-   *          here https://github.com/bitcoinjs/bip39/blob/master/index.js
-   * @throws {TypeError} Langauge not supported by bip39 module
-   */
-  static validateMnemonic(mnemonic, language = "english") {
-    if (language && !(language in wordlists))
-      throw new TypeError(
-        `Language ${language} does not have a wordlist in the bip39 module`
-      );
-    const wordlist = wordlists[language];
-    return validateMnemonic(mnemonic, wordlist);
-  }
-
-  /**
-   * New instance from seed hex string
-   * @param {string} seedHex Hex string
-   */
-  constructor(seedHex) {
-    this.key = slip10.fromMasterSeed(Buffer.from(seedHex, 'hex'));
+  constructor(seed) {
+    this.key = slip10.fromMasterSeed(seed);
   }
 
   /**
